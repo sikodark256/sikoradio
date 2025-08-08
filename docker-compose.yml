@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    image: azuracast/azuracast_web:latest
+    container_name: azuracast_web
+    depends_on:
+      - mariadb
+      - stations
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - azuracast_www:/var/azuracast/www
+      - azuracast_station_data:/var/azuracast/stations
+    env_file: azuracast.env
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:10.4
+    container_name: azuracast_db
+    environment:
+      MYSQL_ROOT_PASSWORD: azuracastroot
+      MYSQL_DATABASE: azuracast
+      MYSQL_USER: azuracast
+      MYSQL_PASSWORD: azuracast
+    volumes:
+      - azuracast_db:/var/lib/mysql
+    restart: unless-stopped
+
+  stations:
+    image: azuracast/azuracast_radio:latest
+    container_name: azuracast_stations
+    volumes:
+      - azuracast_station_data:/var/azuracast/stations
+    env_file: azuracast.env
+    restart: unless-stopped
+
+volumes:
+  azuracast_www:
+  azuracast_station_data:
+  azuracast_db:
